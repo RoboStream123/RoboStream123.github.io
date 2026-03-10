@@ -1,0 +1,48 @@
+name: Deploy Root Pages
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout website source
+        uses: actions/checkout@v4
+        with:
+          repository: RoboStream123/Robostream_website
+          ref: main
+          path: source
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Prepare site artifact
+        run: |
+          mkdir -p _site
+          rsync -av \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='README.md' \
+            source/ _site/
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
