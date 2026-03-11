@@ -31,12 +31,14 @@ jobs:
 
       - name: Prepare site artifact
         run: |
+          SOURCE_SHA="$(git -C source rev-parse --short=12 HEAD)"
           mkdir -p _site
           rsync -av \
             --exclude='.git' \
             --exclude='.github' \
             --exclude='README.md' \
             source/ _site/
+          perl -0pi -e "s|href=\"Figures/icon.png\"|href=\"Figures/icon.png?v=${SOURCE_SHA}\"|g; s|src=\"Figures/icon.png\"|src=\"Figures/icon.png?v=${SOURCE_SHA}\"|g; s|href=\"assets/css/style.css\"|href=\"assets/css/style.css?v=${SOURCE_SHA}\"|g" _site/index.html
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
